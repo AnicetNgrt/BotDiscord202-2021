@@ -6,15 +6,16 @@ const prefix = "=>";
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
+    client.user.setActivity(`${prefix}help`);
 });
 
 client.on('message', message => {
-    if (message.author.bot) return;
-    if (!message.content.startsWith(prefix)) return;
+    if(doDiscardMessage(message)) return;
+    const [command, args] = parseMessage(message.content);
+    handleCommand(command, args);
+});
 
-    const args = message.content.slice(prefix.length).trim().split(" ");
-    const command = args.shift().toLowerCase();
-
+function handleCommand(command, args) {
     if (command === 'ping') {
         message.reply('Pong!');
     }
@@ -29,6 +30,18 @@ client.on('message', message => {
         ans += 'help -> afficher l\'aide\n'
         message.reply(ans);
     }
-});
+}
+
+function doDiscardMessage(message) {
+    if (message.author.bot) return true;
+    if (!message.content.startsWith(prefix)) return true;
+    return false;
+}
+
+function parseMessage(message) {
+    const args = message.content.slice(prefix.length).trim().split(" ");
+    const command = args.shift().toLowerCase();
+    return [command, args];
+}
 
 client.login(process.env.DISCORD_TOKEN);
